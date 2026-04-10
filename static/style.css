@@ -1,0 +1,257 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #ffffff;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.auth-page,
+.page-wrap,
+.chat-page {
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.auth-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card,
+.card,
+.chat-card {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.auth-card {
+    max-width: 420px;
+}
+
+h1, h2 {
+    text-align: center;
+    margin-top: 0;
+}
+
+.auth-form input,
+.auth-form button,
+.chat-form textarea,
+.chat-form input[type="file"],
+.chat-form button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+}
+
+.auth-form input,
+.chat-form textarea,
+.chat-form input[type="file"] {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.auth-form button,
+.chat-form button,
+.btn {
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.auth-form button:hover,
+.chat-form button:hover,
+.btn:hover {
+    background: #1d4ed8;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.auth-link a {
+    color: #93c5fd;
+}
+
+.flash {
+    background: #334155;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #1e293b;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.brand {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-badge {
+    background: #334155;
+    padding: 8px 12px;
+    border-radius: 999px;
+}
+
+.btn.small {
+    padding: 10px 14px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.btn.danger {
+    background: #dc2626;
+}
+
+.btn.danger:hover {
+    background: #b91c1c;
+}
+
+.user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-list li {
+    margin-bottom: 12px;
+}
+
+.user-list a {
+    display: block;
+    background: #334155;
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.user-list a:hover {
+    background: #475569;
+}
+
+.chat-header {
+    margin-bottom: 15px;
+}
+
+.messages-box {
+    background: #0b1220;
+    border-radius: 16px;
+    padding: 14px;
+    min-height: 360px;
+    max-height: 60vh;
+    overflow-y: auto;
+    margin-bottom: 16px;
+}
+
+.message {
+    max-width: 82%;
+    padding: 12px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    word-wrap: break-word;
+}
+
+.my-message {
+    background: #2563eb;
+    margin-left: auto;
+}
+
+.other-message {
+    background: #334155;
+    margin-right: auto;
+}
+
+.message-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+    opacity: 0.95;
+    margin-bottom: 8px;
+}
+
+.message-text {
+    white-space: pre-wrap;
+}
+
+.chat-image,
+.chat-video {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.chat-form textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+@media (max-width: 700px) {
+    .auth-page,
+    .page-wrap,
+    .chat-page {
+        padding: 12px;
+    }
+
+    .auth-card,
+    .card,
+    .chat-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .topbar {
+        padding: 12px;
+    }
+
+    .brand {
+        font-size: 18px;
+    }
+
+    .user-badge {
+        display: none;
+    }
+
+    .message {
+        max-width: 92%;
+    }
+
+    .messages-box {
+        max-height: 55vh;
+    }
+}

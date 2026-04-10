@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}USChat - Registrieren{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h1>USChat</h1>
+        <h2>Registrieren</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <p class="flash">{{ msg }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="auth-form">
+            <input type="text" name="username" placeholder="Benutzername" required>
+            <input type="email" name="email" placeholder="E-Mail" required>
+            <input type="password" name="password" placeholder="Passwort" required>
+            <button type="submit">Registrieren</button>
+        </form>
+
+        <p class="auth-link">
+            Schon ein Konto?
+            <a href="{{ url_for('login') }}">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

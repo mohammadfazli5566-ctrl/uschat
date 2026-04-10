@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}USChat - Chat mit {{ chat_partner }}{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div class="brand">USChat</div>
+    <div class="topbar-right">
+        <a class="btn small" href="{{ url_for('dashboard') }}">Zurück</a>
+        <a class="btn small danger" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</div>
+
+<div class="chat-page">
+    <div class="chat-card">
+        <div class="chat-header">
+            <h2>Chat mit {{ chat_partner }}</h2>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <p class="flash">{{ msg }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="messages-box">
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="message {% if msg['sender'] == current_user %}my-message{% else %}other-message{% endif %}">
+                        <div class="message-meta">
+                            <strong>{{ msg['sender'] }}</strong>
+                            <span>{{ msg['created_at'] }}</span>
+                        </div>
+
+                        {% if msg['message'] %}
+                            <div class="message-text">{{ msg['message'] }}</div>
+                        {% endif %}
+
+                        {% if msg['file_type'] == 'image' %}
+                            <img class="chat-image" src="{{ url_for('protected_media', filename=msg['file_name']) }}" alt="Bild">
+                        {% elif msg['file_type'] == 'video' %}
+                            <video class="chat-video" controls>
+                                <source src="{{ url_for('protected_media', filename=msg['file_name']) }}">
+                                Dein Browser unterstützt kein Video.
+                            </video>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Noch keine Nachrichten.</p>
+            {% endif %}
+        </div>
+
+        <form class="chat-form" method="POST" action="{{ url_for('send_message', username=chat_partner) }}" enctype="multipart/form-data">
+            <textarea name="message" placeholder="Nachricht schreiben..."></textarea>
+            <input type="file" name="file" accept="image/*,video/*">
+            <button type="submit">Senden</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

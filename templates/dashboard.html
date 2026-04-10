@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}USChat - Dashboard{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div class="brand">USChat</div>
+    <div class="topbar-right">
+        <span class="user-badge">{{ current_user }}</span>
+        <a class="btn small danger" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</div>
+
+<div class="page-wrap">
+    <div class="card">
+        <h2>Benutzer</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <p class="flash">{{ msg }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if users %}
+            <ul class="user-list">
+                {% for user in users %}
+                    <li>
+                        <a href="{{ url_for('chat', username=user['username']) }}">
+                            {{ user['username'] }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Keine anderen Benutzer gefunden.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
