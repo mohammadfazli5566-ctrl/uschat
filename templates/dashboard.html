@@ -1,41 +1,120 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UsChat - Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+        }
 
-{% block title %}USChat - Dashboard{% endblock %}
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+        }
 
-{% block content %}
-<div class="topbar">
-    <div class="brand">USChat</div>
-    <div class="topbar-right">
-        <span class="user-badge">{{ current_user }}</span>
-        <a class="btn small danger" href="{{ url_for('logout') }}">Logout</a>
-    </div>
-</div>
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e293b;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
 
-<div class="page-wrap">
-    <div class="card">
-        <h2>Benutzer</h2>
+        .logout-btn {
+            text-decoration: none;
+            background: #dc2626;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .welcome {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .users-box {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #334155;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .chat-btn {
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .flash {
+            background: #334155;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .empty {
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="topbar">
+            <div><strong>UsChat</strong></div>
+            <a class="logout-btn" href="{{ url_for('logout') }}">Logout</a>
+        </div>
 
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for msg in messages %}
-                    <p class="flash">{{ msg }}</p>
+                    <div class="flash">{{ msg }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        {% if users %}
-            <ul class="user-list">
+        <div class="welcome">
+            <h2>Willkommen, {{ current_user }}</h2>
+            <p>Wähle einen Benutzer aus und starte den Chat.</p>
+        </div>
+
+        <div class="users-box">
+            <h3>Benutzer</h3>
+
+            {% if users %}
                 {% for user in users %}
-                    <li>
-                        <a href="{{ url_for('chat', username=user['username']) }}">
-                            {{ user['username'] }}
-                        </a>
-                    </li>
+                    <div class="user-item">
+                        <span>{{ user.username }}</span>
+                        <a class="chat-btn" href="{{ url_for('chat', username=user.username) }}">Chat öffnen</a>
+                    </div>
                 {% endfor %}
-            </ul>
-        {% else %}
-            <p>Keine anderen Benutzer gefunden.</p>
-        {% endif %}
+            {% else %}
+                <p class="empty">Noch keine anderen Benutzer vorhanden.</p>
+            {% endif %}
+        </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>
