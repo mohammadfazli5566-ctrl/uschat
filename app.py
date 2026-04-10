@@ -7,16 +7,15 @@ import random
 import os
 
 app = Flask(__name__)
-app.secret_key = "uschat_secret_key_123"
+app.secret_key = os.environ.get("SECRET_KEY", "uschat_secret_key_123")
 
 DATABASE = "database.db"
 
-# DEINE APP-SENDER-E-MAIL
-# Diese E-Mail verschickt die Reset-Codes an ALLE Benutzer
-SENDER_EMAIL = "deinegmailadresse@gmail.com"
-SENDER_APP_PASSWORD = "dein_google_app_passwort"
+# HIER DEINE ECHTE GMAIL UND APP-PASSWORT EINTRAGEN
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "deinegmailadresse@gmail.com")
+SENDER_APP_PASSWORD = os.environ.get("SENDER_APP_PASSWORD", "dein_google_app_passwort")
 
-# Temporärer Speicher für Reset-Codes
+# Temporäre Reset-Codes
 reset_codes = {}
 
 
@@ -40,6 +39,10 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+
+# WICHTIG: Tabelle direkt beim Start erstellen
+init_db()
 
 
 @app.route("/")
@@ -110,11 +113,7 @@ def chat():
         flash("Bitte zuerst einloggen.")
         return redirect(url_for("login"))
 
-    return f"""
-    <h1>Willkommen bei UsChat, {session['username']}!</h1>
-    <p>Du bist eingeloggt.</p>
-    <a href="/logout">Logout</a>
-    """
+    return render_template("chat.html", username=session["username"])
 
 
 @app.route("/logout")
@@ -207,6 +206,5 @@ def reset_password(email):
 
 
 if __name__ == "__main__":
-    init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
