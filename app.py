@@ -69,7 +69,7 @@ def init_db():
 
 
 # ==============================
-# Migration für alte DB
+# Migration für alte Datenbank
 # ==============================
 def migrate_db():
     conn = get_db_connection()
@@ -98,7 +98,7 @@ def ensure_db():
     migrate_db()
 
 
-# WICHTIG für Render / gunicorn
+# WICHTIG: direkt beim Start ausführen
 ensure_db()
 
 
@@ -284,6 +284,7 @@ def chat(username):
         return redirect(url_for("login"))
 
     conn = get_db_connection()
+
     partner = conn.execute(
         "SELECT username FROM users WHERE username = ?",
         (username,)
@@ -382,7 +383,7 @@ def media(filename):
 
 
 # ==============================
-# Fehler: Datei zu groß
+# Datei zu groß
 # ==============================
 @app.errorhandler(413)
 def too_large(e):
