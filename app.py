@@ -16,30 +16,24 @@ app.secret_key = os.environ.get("SECRET_KEY", "uschat_secret_2026")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "database.db")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "private_uploads")
-MAX_CONTENT_LENGTH = 25 * 1024 * 1024  # 25MB
+MAX_CONTENT_LENGTH = 25 * 1024 * 1024
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "mp4", "webm", "mov"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = False  # später True bei HTTPS
+app.config["SESSION_COOKIE_SECURE"] = False
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-# ==============================
-# DB Verbindung
-# ==============================
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
 
-# ==============================
-# DB erstellen
-# ==============================
 def init_db():
     conn = get_db_connection()
 
@@ -68,9 +62,6 @@ def init_db():
     conn.close()
 
 
-# ==============================
-# Migration für alte DB
-# ==============================
 def migrate_db():
     conn = get_db_connection()
 
@@ -98,13 +89,9 @@ def ensure_db():
     migrate_db()
 
 
-# WICHTIG für Render / gunicorn
 ensure_db()
 
 
-# ==============================
-# Datei prüfen
-# ==============================
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -118,12 +105,8 @@ def get_file_type(filename):
     return None
 
 
-# ==============================
-# Alte Nachrichten löschen
-# ==============================
 def delete_old_messages():
     ensure_db()
-
     conn = get_db_connection()
 
     limit_time = datetime.now() - timedelta(hours=48)
@@ -151,9 +134,6 @@ def delete_old_messages():
     conn.close()
 
 
-# ==============================
-# Login prüfen
-# ==============================
 def is_logged_in():
     return "user" in session
 
@@ -166,9 +146,6 @@ def auto_cleanup():
         pass
 
 
-# ==============================
-# Home
-# ==============================
 @app.route("/")
 def home():
     ensure_db()
@@ -177,9 +154,6 @@ def home():
     return redirect(url_for("login"))
 
 
-# ==============================
-# Register
-# ==============================
 @app.route("/register", methods=["GET", "POST"])
 def register():
     ensure_db()
@@ -216,9 +190,6 @@ def register():
     return render_template("register.html")
 
 
-# ==============================
-# Login
-# ==============================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     ensure_db()
@@ -244,18 +215,12 @@ def login():
     return render_template("login.html")
 
 
-# ==============================
-# Logout
-# ==============================
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
 
-# ==============================
-# Dashboard
-# ==============================
 @app.route("/dashboard")
 def dashboard():
     ensure_db()
@@ -273,9 +238,6 @@ def dashboard():
     return render_template("dashboard.html", users=users, current_user=session["user"])
 
 
-# ==============================
-# Chat
-# ==============================
 @app.route("/chat/<username>")
 def chat(username):
     ensure_db()
@@ -311,9 +273,6 @@ def chat(username):
     )
 
 
-# ==============================
-# Nachricht senden
-# ==============================
 @app.route("/send_message/<username>", methods=["POST"])
 def send_message(username):
     ensure_db()
@@ -357,9 +316,6 @@ def send_message(username):
     return redirect(url_for("chat", username=username))
 
 
-# ==============================
-# Geschützte Medien
-# ==============================
 @app.route("/media/<filename>")
 def media(filename):
     ensure_db()
@@ -382,18 +338,12 @@ def media(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename, mimetype=mime)
 
 
-# ==============================
-# Datei zu groß
-# ==============================
 @app.errorhandler(413)
 def too_large(e):
     flash("Datei zu groß")
     return redirect(url_for("dashboard"))
 
 
-# ==============================
-# PWA
-# ==============================
 @app.route("/manifest.json")
 def manifest():
     return send_from_directory("static", "manifest.json")
@@ -404,9 +354,6 @@ def sw():
     return send_from_directory("static", "sw.js")
 
 
-# ==============================
-# Start
-# ==============================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
