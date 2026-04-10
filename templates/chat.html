@@ -1,63 +1,130 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>UsChat</title>
 
-{% block title %}USChat - Chat mit {{ chat_partner }}{% endblock %}
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+        }
 
-{% block content %}
-<div class="topbar">
-    <div class="brand">USChat</div>
-    <div class="topbar-right">
-        <a class="btn small" href="{{ url_for('dashboard') }}">Zurück</a>
-        <a class="btn small danger" href="{{ url_for('logout') }}">Logout</a>
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .chat-box {
+            background: #1e293b;
+            padding: 15px;
+            height: 400px;
+            overflow-y: scroll;
+            border-radius: 10px;
+        }
+
+        .message {
+            background: #334155;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .me {
+            background: #2563eb;
+        }
+
+        .file {
+            color: #38bdf8;
+            display: block;
+            margin-top: 5px;
+        }
+
+        form {
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        input[type="file"] {
+            color: white;
+        }
+
+        button {
+            padding: 10px;
+            background: #22c55e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .logout {
+            background: red;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="top-bar">
+        <span>👤 {{ user }}</span>
+        <a class="logout" href="{{ url_for('logout') }}">Logout</a>
     </div>
+
+    <h2>💬 UsChat</h2>
+
+    <div class="chat-box">
+
+        {% for msg in messages %}
+            <div class="message {% if msg.sender == user %}me{% endif %}">
+                <strong>{{ msg.sender }}</strong><br>
+                {{ msg.message }}
+
+                {% if msg.file_name %}
+                    <a class="file" href="{{ url_for('uploaded_file', filename=msg.file_name) }}" target="_blank">
+                        📎 Datei öffnen
+                    </a>
+                {% endif %}
+
+                <br>
+                <small>{{ msg.created_at }}</small>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="message" placeholder="Nachricht..." autocomplete="off">
+        <input type="file" name="file">
+        <button type="submit">Senden</button>
+    </form>
+
 </div>
 
-<div class="chat-page">
-    <div class="chat-card">
-        <div class="chat-header">
-            <h2>Chat mit {{ chat_partner }}</h2>
-        </div>
-
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for msg in messages %}
-                    <p class="flash">{{ msg }}</p>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="messages-box">
-            {% if messages %}
-                {% for msg in messages %}
-                    <div class="message {% if msg['sender'] == current_user %}my-message{% else %}other-message{% endif %}">
-                        <div class="message-meta">
-                            <strong>{{ msg['sender'] }}</strong>
-                            <span>{{ msg['created_at'] }}</span>
-                        </div>
-
-                        {% if msg['message'] %}
-                            <div class="message-text">{{ msg['message'] }}</div>
-                        {% endif %}
-
-                        {% if msg['file_type'] == 'image' %}
-                            <img class="chat-image" src="{{ url_for('protected_media', filename=msg['file_name']) }}" alt="Bild">
-                        {% elif msg['file_type'] == 'video' %}
-                            <video class="chat-video" controls>
-                                <source src="{{ url_for('protected_media', filename=msg['file_name']) }}">
-                                Dein Browser unterstützt kein Video.
-                            </video>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>Noch keine Nachrichten.</p>
-            {% endif %}
-        </div>
-
-        <form class="chat-form" method="POST" action="{{ url_for('send_message', username=chat_partner) }}" enctype="multipart/form-data">
-            <textarea name="message" placeholder="Nachricht schreiben..."></textarea>
-            <input type="file" name="file" accept="image/*,video/*">
-            <button type="submit">Senden</button>
-        </form>
-    </div>
-</div>
-{% endblock %}
+</body>
+</html>
