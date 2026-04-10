@@ -1,31 +1,80 @@
-{% extends "base.html" %}
-
-{% block title %}USChat - Login{% endblock %}
-
-{% block content %}
-<div class="auth-page">
-    <div class="auth-card">
-        <h1>USChat</h1>
-        <h2>Login</h2>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>UsChat - Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .box {
+            width: 90%;
+            max-width: 400px;
+            margin: 80px auto;
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+        .msg {
+            background: #334155;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        p {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>UsChat Login</h2>
 
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for msg in messages %}
-                    <p class="flash">{{ msg }}</p>
+                    <div class="msg">{{ msg }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <form method="POST" class="auth-form">
-            <input type="email" name="email" placeholder="E-Mail" required>
-            <input type="password" name="password" placeholder="Passwort" required>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Benutzername">
+            <input type="password" name="password" placeholder="Passwort">
             <button type="submit">Einloggen</button>
         </form>
 
-        <p class="auth-link">
-            Noch kein Konto?
-            <a href="{{ url_for('register') }}">Registrieren</a>
-        </p>
+        <p>Noch kein Konto? <a href="{{ url_for('register') }}">Registrieren</a></p>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>

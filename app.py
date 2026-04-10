@@ -8,8 +8,9 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "uschat_super_secret_key_123")
 
-DATABASE = "database.db"
-UPLOAD_FOLDER = "static/uploads"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "database.db")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "txt", "doc", "docx"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -52,9 +53,11 @@ def init_db():
     conn.close()
 
 
-# Render / Gunicorn startet __main__ nicht.
-# Deshalb Datenbank hier direkt initialisieren.
-init_db()
+def ensure_db():
+    init_db()
+
+
+ensure_db()
 
 
 # ==============================
@@ -65,10 +68,8 @@ def allowed_file(filename):
 
 
 def cleanup_old_files():
-    """
-    Löscht Upload-Dateien älter als 24 Stunden,
-    wenn sie in messages.file_name gespeichert sind.
-    """
+    ensure_db()
+
     limit_time = datetime.now() - timedelta(hours=24)
     limit_time_str = limit_time.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -81,6 +82,7 @@ def cleanup_old_files():
     for row in old_files:
         file_name = row["file_name"]
         file_path = os.path.join(app.config["UPLOAD_FOLDER"], file_name)
+
         if os.path.exists(file_path):
             try:
                 os.remove(file_path)
@@ -95,6 +97,7 @@ def cleanup_old_files():
 # ==============================
 @app.route("/")
 def home():
+    ensure_db()
     cleanup_old_files()
 
     if "user" in session:
@@ -104,6 +107,8 @@ def home():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    ensure_db()
+
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
@@ -135,6 +140,8 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    ensure_db()
+
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
@@ -159,10 +166,11 @@ def login():
 
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
+    ensure_db()
+    cleanup_old_files()
+
     if "user" not in session:
         return redirect(url_for("login"))
-
-    cleanup_old_files()
 
     if request.method == "POST":
         message_text = request.form.get("message", "").strip()
@@ -222,8 +230,5 @@ def logout():
     return redirect(url_for("login"))
 
 
-# ==============================
-# START
-# ==============================
 if __name__ == "__main__":
     app.run(debug=True)
