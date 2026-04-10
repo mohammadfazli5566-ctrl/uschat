@@ -3,27 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}USChat{% endblock %}</title>
+    <title>UsChat</title>
 
-    <meta name="theme-color" content="#1d4ed8">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="USChat">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UsChat">
 
-    <link rel="manifest" href="{{ url_for('manifest') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 450px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.08);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #0d6efd;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0b5ed7;
+        }
+
+        a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        .flash {
+            background: #eef4ff;
+            color: #0d6efd;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    {% block content %}{% endblock %}
 
-    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
     <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", function () {
-                navigator.serviceWorker.register("/sw.js");
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("/static/service-worker.js")
+            .then(function (registration) {
+              console.log("Service Worker registriert:", registration.scope);
+            })
+            .catch(function (error) {
+              console.log("Service Worker Fehler:", error);
             });
-        }
+        });
+      }
     </script>
+
 </body>
 </html>
