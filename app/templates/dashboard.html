@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Private Chats</h2>
+
+{% if current_user.is_admin %}
+    <p>
+        <a href="{{ url_for('admin.dashboard') }}">Admin-Bereich öffnen</a>
+    </p>
+{% endif %}
+
+{% if users %}
+    {% for user in users %}
+        <div class="user-card">
+            <strong>{{ user.username }}</strong><br>
+
+            {% if user.is_online %}
+                <span style="color:green;">● Online</span>
+            {% else %}
+                <span style="color:gray;">
+                    zuletzt: {{ user.last_seen.strftime('%d.%m.%Y %H:%M') }}
+                </span>
+            {% endif %}
+
+            <br><br>
+
+            <a class="small-link" href="{{ url_for('chat.private_chat', user_id=user.id) }}">
+                Privaten Chat öffnen
+            </a>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Keine anderen Benutzer gefunden.</p>
+{% endif %}
+
+<hr style="margin: 24px 0;">
+
+<h2>Gruppen</h2>
+
+<p>
+    <a href="{{ url_for('chat.create_group') }}">Neue Gruppe erstellen</a>
+</p>
+
+{% if groups %}
+    {% for group in groups %}
+        <div class="user-card">
+            <strong>{{ group.name }}</strong><br>
+            <a class="small-link" href="{{ url_for('chat.group_chat', group_id=group.id) }}">
+                Gruppe öffnen
+            </a>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Du bist noch in keiner Gruppe.</p>
+{% endif %}
+
+<br>
+<p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Neue Gruppe erstellen</h2>
+
+<form method="POST">
+    <input type="text" name="name" placeholder="Gruppenname" required>
+
+    <div style="margin-top: 15px;">
+        <strong>Mitglieder auswählen:</strong>
+    </div>
+
+    {% if users %}
+        {% for user in users %}
+            <div style="margin-top: 10px; text-align: left;">
+                <label>
+                    <input type="checkbox" name="members" value="{{ user.id }}" style="width: auto; margin-right: 8px;">
+                    {{ user.username }}
+                </label>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Keine anderen Benutzer vorhanden.</p>
+    {% endif %}
+
+    <button type="submit" style="margin-top: 20px;">Gruppe erstellen</button>
+</form>
+
+<p><a href="{{ url_for('chat.dashboard') }}">Zurück</a></p>
+{% endblock %}

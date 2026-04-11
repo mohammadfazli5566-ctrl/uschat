@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Admin-Bereich</h2>
+
+{% if users %}
+    {% for user in users %}
+        <div class="user-card">
+            <strong>{{ user.username }}</strong><br>
+            {{ user.email }}<br><br>
+
+            {% if user.is_admin %}
+                <span style="color: darkred;">Admin</span>
+            {% else %}
+                <span style="color: gray;">Benutzer</span>
+            {% endif %}
+
+            <br>
+
+            {% if user.is_active_user %}
+                <span style="color: green;">Aktiv</span>
+            {% else %}
+                <span style="color: red;">Deaktiviert</span>
+            {% endif %}
+
+            <br><br>
+
+            {% if not user.is_admin %}
+                <a href="{{ url_for('admin.make_admin', user_id=user.id) }}">Zum Admin machen</a><br>
+            {% endif %}
+
+            {% if user.is_admin and user.id != current_user.id %}
+                <a href="{{ url_for('admin.remove_admin', user_id=user.id) }}">Admin entfernen</a><br>
+            {% endif %}
+
+            {% if user.is_active_user and user.id != current_user.id %}
+                <a href="{{ url_for('admin.deactivate_user', user_id=user.id) }}">Deaktivieren</a><br>
+            {% endif %}
+
+            {% if not user.is_active_user %}
+                <a href="{{ url_for('admin.activate_user', user_id=user.id) }}">Aktivieren</a><br>
+            {% endif %}
+
+            {% if user.id != current_user.id %}
+                <a href="{{ url_for('admin.delete_user', user_id=user.id) }}">Löschen</a>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Keine Benutzer vorhanden.</p>
+{% endif %}
+
+<p><a href="{{ url_for('chat.dashboard') }}">Zurück zur Übersicht</a></p>
+{% endblock %}
