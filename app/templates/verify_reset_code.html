@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Code bestätigen</title>
+</head>
+<body>
+
+  <h2>Code bestätigen</h2>
+
+  <form method="POST">
+    <input type="hidden" name="email" value="{{ email }}">
+
+    <label>Code</label>
+    <input type="text" name="code" required>
+
+    <button type="submit">Bestätigen</button>
+  </form>
+
+</body>
+</html>
