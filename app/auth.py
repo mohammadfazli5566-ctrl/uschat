@@ -1,34 +1,39 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User, db
 
-import smtplib
-import random
-from email.message import EmailMessage
+# 🔥 SENDGRID
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 auth_bp = Blueprint("auth", __name__)
 
 
+# =========================
+# EMAIL SENDEN (SENDGRID)
+# =========================
 def send_email(to_email, subject, body):
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = current_app.config.get("MAIL_DEFAULT_SENDER")
-    msg["To"] = to_email
-    msg.set_content(body)
-
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as smtp:
-            smtp.login(
-                current_app.config.get("MAIL_USERNAME"),
-                current_app.config.get("MAIL_PASSWORD")
-            )
-            smtp.send_message(msg)
+        message = Mail(
+            from_email=current_app.config.get("MAIL_DEFAULT_SENDER"),
+            to_emails=to_email,
+            subject=subject,
+            plain_text_content=body
+        )
+
+        sg = SendGridAPIClient(current_app.config.get("SENDGRID_API_KEY"))
+        sg.send(message)
+
         return True
     except Exception as e:
-        print("Email Fehler:", e)
+        print("SendGrid Fehler:", e)
         return False
 
 
+# =========================
+# HOME
+# =========================
 @auth_bp.route("/")
 def home():
     if current_user.is_authenticated:
@@ -36,6 +41,9 @@ def home():
     return redirect(url_for("auth.login"))
 
 
+# =========================
+# REGISTER
+# =========================
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -43,63 +51,38 @@ def register():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        if User.query.filter_by(email=email).first():
+        # prüfen ob existiert
+        user_exists = User.query.filter_by(email=email).first()
+        if user_exists:
             flash("Diese E-Mail ist bereits registriert.")
             return redirect(url_for("auth.register"))
 
-        code = str(random.randint(100000, 999999))
+        # 🔥 USER ERSTELLEN (RICHTIG)
+        new_user = User(
+            email=email,
+            username=username
+        )
+        new_user.set_password(password)
 
-        session["pending_email"] = email
-        session["pending_username"] = username
-        session["pending_password"] = password
-        session["verify_code"] = code
+        db.session.add(new_user)
+        db.session.commit()
 
-        sent = send_email(
+        # 🔥 EMAIL SENDEN
+        send_email(
             email,
-            "Dein UsChatSecure Bestätigungscode",
-            f"Dein Bestätigungscode lautet: {code}"
+            "Willkommen bei UsChat",
+            f"Hallo {username}, dein Account wurde erfolgreich erstellt!"
         )
 
-        if not sent:
-            flash("E-Mail konnte nicht gesendet werden.")
-            return redirect(url_for("auth.register"))
-
-        flash("Wir haben dir einen Code per E-Mail gesendet.")
-        return redirect(url_for("auth.verify_code"))
+        flash("Registrierung erfolgreich. Du kannst dich jetzt einloggen.")
+        return redirect(url_for("auth.login"))
 
     return render_template("register.html")
 
 
-@auth_bp.route("/verify_code", methods=["GET", "POST"])
-def verify_code():
-    if request.method == "POST":
-        entered_code = request.form.get("code")
-
-        if entered_code == session.get("verify_code"):
-            new_user = User(
-                email=session.get("pending_email"),
-                username=session.get("pending_username")
-            )
-
-            new_user.set_password(session.get("pending_password"))
-
-            db.session.add(new_user)
-            db.session.commit()
-
-            session.pop("pending_email", None)
-            session.pop("pending_username", None)
-            session.pop("pending_password", None)
-            session.pop("verify_code", None)
-
-            flash("Registrierung erfolgreich. Du kannst dich jetzt einloggen.")
-            return redirect(url_for("auth.login"))
-
-        flash("Der Code ist falsch.")
-        return redirect(url_for("auth.verify_code"))
-
-    return render_template("verify_code.html")
-
-
+# =========================
+# LOGIN
+# =========================
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -117,12 +100,18 @@ def login():
     return render_template("login.html")
 
 
+# =========================
+# DASHBOARD
+# =========================
 @auth_bp.route("/dashboard")
 @login_required
 def dashboard():
     return render_template("dashboard.html")
 
 
+# =========================
+# LOGOUT
+# =========================
 @auth_bp.route("/logout")
 @login_required
 def logout():
@@ -130,15 +119,23 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
+# =========================
+# PASSWORT RESET (EINFACH)
+# =========================
 @auth_bp.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
         email = request.form.get("email")
+
         user = User.query.filter_by(email=email).first()
 
         if user:
-            send_email(email, "Passwort Reset", "Du hast einen Reset angefordert.")
-            flash("E-Mail gesendet.")
+            send_email(
+                email,
+                "Passwort Reset",
+                "Du hast einen Passwort-Reset angefordert."
+            )
+            flash("E-Mail wurde gesendet.")
 
         return redirect(url_for("auth.login"))
 
