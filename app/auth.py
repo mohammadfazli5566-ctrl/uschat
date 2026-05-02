@@ -59,9 +59,10 @@ def register():
 
         # 🔥 USER ERSTELLEN (RICHTIG)
         new_user = User(
-            email=email,
-            username=username
-        )
+    email=email,
+    username=username,
+    is_verified=True   # 🔥 DAS HIER HINZUFÜGEN
+    )
         new_user.set_password(password)
 
         db.session.add(new_user)
