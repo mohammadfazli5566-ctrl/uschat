@@ -1,6 +1,36 @@
-.env
-__pycache__/
+# Python
+
+**pycache**/
 *.pyc
+*.pyo
+*.pyd
+
+# Environment / Sicherheit
+
+.env
+
+# Flask Instance (Datenbank etc.)
+
 instance/
-database.db
-app/static/uploads/*
+
+# Uploads (User Dateien)
+
+uploads/
+
+# Datenbank
+
+*.db
+*.sqlite3
+
+# Logs
+
+*.log
+
+# VS Code
+
+.vscode/
+
+# Mac / Windows Müll
+
+.DS_Store
+Thumbs.db
