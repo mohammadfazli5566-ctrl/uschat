@@ -49,25 +49,17 @@ def register():
             flash("Diese E-Mail ist bereits registriert.")
             return redirect(url_for("auth.register"))
 
-        code = str(random.randint(100000, 999999))
-
-        session["pending_email"] = email
-        session["pending_username"] = username
-        session["pending_password"] = generate_password_hash(password)
-        session["verify_code"] = code
-
-        email_sent = send_email(
-            email,
-            "Dein UsChatSecure Bestätigungscode",
-            f"Dein Bestätigungscode lautet: {code}"
+        new_user = User(
+            email=email,
+            username=username,
+            password=generate_password_hash(password)
         )
 
-        if not email_sent:
-            flash("E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen.")
-            return redirect(url_for("auth.register"))
+        db.session.add(new_user)
+        db.session.commit()
 
-        flash("Wir haben dir einen Bestätigungscode per E-Mail gesendet.")
-        return redirect(url_for("auth.verify_code"))
+        flash("Registrierung erfolgreich. Du kannst dich jetzt einloggen.")
+        return redirect(url_for("auth.login"))
 
     return render_template("register.html")
 
