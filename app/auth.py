@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User, db
 
 import smtplib
@@ -44,22 +43,29 @@ def register():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        user_exists = User.query.filter_by(email=email).first()
-        if user_exists:
+        if User.query.filter_by(email=email).first():
             flash("Diese E-Mail ist bereits registriert.")
             return redirect(url_for("auth.register"))
 
-        new_user = User(
-            email=email,
-            username=username,
-            password=generate_password_hash(password)
+        code = str(random.randint(100000, 999999))
+
+        session["pending_email"] = email
+        session["pending_username"] = username
+        session["pending_password"] = password
+        session["verify_code"] = code
+
+        sent = send_email(
+            email,
+            "Dein UsChatSecure Bestätigungscode",
+            f"Dein Bestätigungscode lautet: {code}"
         )
 
-        db.session.add(new_user)
-        db.session.commit()
+        if not sent:
+            flash("E-Mail konnte nicht gesendet werden.")
+            return redirect(url_for("auth.register"))
 
-        flash("Registrierung erfolgreich. Du kannst dich jetzt einloggen.")
-        return redirect(url_for("auth.login"))
+        flash("Wir haben dir einen Code per E-Mail gesendet.")
+        return redirect(url_for("auth.verify_code"))
 
     return render_template("register.html")
 
@@ -72,9 +78,10 @@ def verify_code():
         if entered_code == session.get("verify_code"):
             new_user = User(
                 email=session.get("pending_email"),
-                username=session.get("pending_username"),
-                password=session.get("pending_password")
+                username=session.get("pending_username")
             )
+
+            new_user.set_password(session.get("pending_password"))
 
             db.session.add(new_user)
             db.session.commit()
@@ -101,7 +108,7 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
-        if user and check_password_hash(user.password, password):
+        if user and user.check_password(password):
             login_user(user)
             return redirect(url_for("auth.dashboard"))
 
