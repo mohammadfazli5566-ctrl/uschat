@@ -2,25 +2,28 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Deine App</title>
+    <title>UsChatSecure</title>
 </head>
 <body>
 
-    <!-- Flash Nachrichten -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <p style="color: 
-                    {% if category == 'danger' %}red
-                    {% elif category == 'success' %}green
-                    {% else %}black{% endif %};">
-                    {{ message }}
-                </p>
+
+                {% if category == "danger" %}
+                    <p style="color: red;">{{ message }}</p>
+                {% elif category == "success" %}
+                    <p style="color: green;">{{ message }}</p>
+                {% elif category == "warning" %}
+                    <p style="color: orange;">{{ message }}</p>
+                {% else %}
+                    <p style="color: black;">{{ message }}</p>
+                {% endif %}
+
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <!-- Inhalt -->
     {% block content %}{% endblock %}
 
 </body>
