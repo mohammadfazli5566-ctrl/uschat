@@ -1,14 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Login</h1>
+
+<h2>Einloggen</h2>
 
 <form method="POST">
-    <input type="email" name="email" placeholder="E-Mail" required>
-    <input type="password" name="password" placeholder="Passwort" required>
+    <label>E-Mail</label>
+    <input type="email" name="email" required>
+
+    <label>Passwort</label>
+    <input type="password" name="password" required>
+
     <button type="submit">Einloggen</button>
 </form>
 
-<p>Noch kein Konto? <a href="{{ url_for('auth.register') }}">Registrieren</a></p>
-<p><a href="{{ url_for('auth.forgot_password') }}">Passwort vergessen?</a></p>
+<p style="text-align:center; margin-top:15px;">
+    Noch kein Konto?
+    <a href="{{ url_for('auth.register') }}">Registrieren</a>
+</p>
+
+<p style="text-align:center;">
+    <a href="{{ url_for('auth.forgot_password') }}">Passwort vergessen?</a>
+</p>
+
 {% endblock %}

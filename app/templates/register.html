@@ -1,14 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Registrieren</h1>
+
+<h2>Registrieren</h2>
 
 <form method="POST">
-    <input type="text" name="username" placeholder="Benutzername" required>
-    <input type="email" name="email" placeholder="E-Mail" required>
-    <input type="password" name="password" placeholder="Passwort" required>
-    <button type="submit">Konto erstellen</button>
+    <label>Benutzername</label>
+    <input type="text" name="username" required>
+
+    <label>E-Mail</label>
+    <input type="email" name="email" required>
+
+    <label>Passwort</label>
+    <input type="password" name="password" required>
+
+    <button type="submit">Registrieren</button>
 </form>
 
-<p>Schon ein Konto? <a href="{{ url_for('auth.login') }}">Login</a></p>
+<p style="text-align:center; margin-top:15px;">
+    Schon Konto?
+    <a href="{{ url_for('auth.login') }}">Einloggen</a>
+</p>
+
 {% endblock %}
