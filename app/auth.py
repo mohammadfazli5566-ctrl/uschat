@@ -4,6 +4,7 @@ import random
 
 from app import db
 from app.models import User
+from app.email_utils import send_reset_code
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -62,6 +63,7 @@ def logout():
 def forgot_password():
     if request.method == "POST":
         email = request.form.get("email")
+
         user = User.query.filter_by(email=email).first()
 
         if not user:
@@ -69,12 +71,17 @@ def forgot_password():
             return redirect(url_for("auth.forgot_password"))
 
         code = str(random.randint(100000, 999999))
+
         session["reset_email"] = email
         session["reset_code"] = code
 
-        print("CODE:", code)
+        email_sent = send_reset_code(email, code)
 
-        flash("Code wurde erstellt. Schau im Terminal/Render-Log.", "success")
+        if email_sent:
+            flash("Code wurde per E-Mail gesendet.", "success")
+        else:
+            flash("E-Mail konnte nicht gesendet werden. Code steht im Terminal/Render-Log.", "warning")
+
         return redirect(url_for("auth.verify_code"))
 
     return render_template("forgot_password.html")
@@ -86,6 +93,7 @@ def verify_code():
         code = request.form.get("code")
 
         if code == session.get("reset_code"):
+            flash("Code richtig. Bitte neues Passwort eingeben.", "success")
             return redirect(url_for("auth.reset_password"))
 
         flash("Falscher Code.", "danger")
@@ -122,7 +130,7 @@ def reset_password():
         session.pop("reset_email", None)
         session.pop("reset_code", None)
 
-        flash("Passwort wurde geändert.", "success")
+        flash("Passwort wurde geändert. Bitte einloggen.", "success")
         return redirect(url_for("auth.login"))
 
     return render_template("reset_password.html")
