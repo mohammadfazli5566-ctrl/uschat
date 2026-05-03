@@ -1,59 +1,49 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Private Chats</h2>
 
-{% if current_user.is_admin %}
+<h2 style="text-align:center;">Dashboard</h2>
+
+<!-- Logout -->
+<div style="text-align:right; margin-bottom:20px;">
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</div>
+
+<hr>
+
+<!-- Private Chats -->
+<h3>Private Chats</h3>
+
+{% for user in users %}
     <p>
-        <a href="{{ url_for('admin.dashboard') }}">Admin-Bereich öffnen</a>
+        <a href="{{ url_for('chat.private_chat', user_id=user.id) }}">
+            {{ user.username }} ({{ user.email }})
+        </a>
     </p>
-{% endif %}
-
-{% if users %}
-    {% for user in users %}
-        <div class="user-card">
-            <strong>{{ user.username }}</strong><br>
-
-            {% if user.is_online %}
-                <span style="color:green;">● Online</span>
-            {% else %}
-                <span style="color:gray;">
-                    zuletzt: {{ user.last_seen.strftime('%d.%m.%Y %H:%M') }}
-                </span>
-            {% endif %}
-
-            <br><br>
-
-            <a class="small-link" href="{{ url_for('chat.private_chat', user_id=user.id) }}">
-                Privaten Chat öffnen
-            </a>
-        </div>
-    {% endfor %}
 {% else %}
-    <p>Keine anderen Benutzer gefunden.</p>
-{% endif %}
+    <p>Keine Benutzer gefunden.</p>
+{% endfor %}
 
-<hr style="margin: 24px 0;">
+<hr>
 
-<h2>Gruppen</h2>
+<!-- Gruppen erstellen -->
+<div style="margin-top:20px;">
+    <a href="{{ url_for('chat.create_group') }}">
+        ➕ Neue Gruppe erstellen
+    </a>
+</div>
 
-<p>
-    <a href="{{ url_for('chat.create_group') }}">Neue Gruppe erstellen</a>
-</p>
+<!-- Gruppen anzeigen -->
+<h3>Meine Gruppen</h3>
 
-{% if groups %}
-    {% for group in groups %}
-        <div class="user-card">
-            <strong>{{ group.name }}</strong><br>
-            <a class="small-link" href="{{ url_for('chat.group_chat', group_id=group.id) }}">
-                Gruppe öffnen
-            </a>
-        </div>
-    {% endfor %}
+{% for group in groups %}
+    <p>
+        <a href="{{ url_for('chat.group_chat', group_id=group.id) }}">
+            📌 {{ group.name }}
+        </a>
+    </p>
 {% else %}
     <p>Du bist noch in keiner Gruppe.</p>
-{% endif %}
+{% endfor %}
 
-<br>
-<p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
 {% endblock %}

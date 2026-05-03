@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Gruppe: {{ group.name }}</h2>
+
+<h4>Mitglieder:</h4>
+<ul>
+    {% for member in members %}
+        <li>{{ member.username }}</li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<div>
+    {% for msg in messages %}
+        <p>
+            <strong>User {{ msg.sender_id }}:</strong>
+            {{ msg.content }}
+        </p>
+    {% endfor %}
+</div>
+
+<form method="POST">
+    <input type="text" name="content" placeholder="Nachricht schreiben..." required>
+    <button type="submit">Senden</button>
+</form>
+
+<p style="text-align:center; margin-top:15px;">
+    <a href="{{ url_for('chat.dashboard') }}">Zurück zum Dashboard</a>
+</p>
+
+{% endblock %}
