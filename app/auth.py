@@ -10,7 +10,7 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/login")
 def login():
-    return "<h2>Login Seite</h2>"
+    return render_template("login.html")
 
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
