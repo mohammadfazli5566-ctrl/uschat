@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash
 import random
 
 from app import db
@@ -17,7 +16,7 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
-        if not user or not check_password_hash(user.password, password):
+        if not user or not user.check_password(password):
             flash("E-Mail oder Passwort ist falsch.", "danger")
             return redirect(url_for("auth.login"))
 
@@ -40,11 +39,8 @@ def register():
             flash("Diese E-Mail ist schon registriert.", "danger")
             return redirect(url_for("auth.register"))
 
-        new_user = User(
-            username=username,
-            email=email,
-            password=generate_password_hash(password)
-        )
+        new_user = User(username=username, email=email)
+        new_user.set_password(password)
 
         db.session.add(new_user)
         db.session.commit()
@@ -66,7 +62,6 @@ def logout():
 def forgot_password():
     if request.method == "POST":
         email = request.form.get("email")
-
         user = User.query.filter_by(email=email).first()
 
         if not user:
@@ -74,13 +69,12 @@ def forgot_password():
             return redirect(url_for("auth.forgot_password"))
 
         code = str(random.randint(100000, 999999))
-
         session["reset_email"] = email
         session["reset_code"] = code
 
         print("CODE:", code)
 
-        flash("Code wurde erstellt. Schau im Render-Log oder Terminal.", "success")
+        flash("Code wurde erstellt. Schau im Terminal/Render-Log.", "success")
         return redirect(url_for("auth.verify_code"))
 
     return render_template("forgot_password.html")
@@ -122,7 +116,7 @@ def reset_password():
             flash("Benutzer nicht gefunden.", "danger")
             return redirect(url_for("auth.forgot_password"))
 
-        user.password = generate_password_hash(pw)
+        user.set_password(pw)
         db.session.commit()
 
         session.pop("reset_email", None)
