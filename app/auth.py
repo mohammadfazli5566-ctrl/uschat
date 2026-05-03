@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from werkzeug.security import generate_password_hash
+from flask_login import login_user, logout_user, login_required
+from werkzeug.security import generate_password_hash, check_password_hash
 import random
 
 from app import db
@@ -8,9 +9,57 @@ from app.models import User
 auth_bp = Blueprint("auth", __name__)
 
 
-@auth_bp.route("/login")
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user or not check_password_hash(user.password, password):
+            flash("E-Mail oder Passwort ist falsch.", "danger")
+            return redirect(url_for("auth.login"))
+
+        login_user(user)
+        return redirect(url_for("chat.dashboard"))
+
     return render_template("login.html")
+
+
+@auth_bp.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        existing_user = User.query.filter_by(email=email).first()
+
+        if existing_user:
+            flash("Diese E-Mail ist schon registriert.", "danger")
+            return redirect(url_for("auth.register"))
+
+        new_user = User(
+            username=username,
+            email=email,
+            password=generate_password_hash(password)
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Registrierung erfolgreich. Bitte einloggen.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("register.html")
+
+
+@auth_bp.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("auth.login"))
 
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
@@ -21,7 +70,7 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
 
         if not user:
-            flash("E-Mail nicht gefunden", "danger")
+            flash("E-Mail nicht gefunden.", "danger")
             return redirect(url_for("auth.forgot_password"))
 
         code = str(random.randint(100000, 999999))
@@ -31,7 +80,7 @@ def forgot_password():
 
         print("CODE:", code)
 
-        flash("Code wurde erstellt (siehe Terminal)", "success")
+        flash("Code wurde erstellt. Schau im Render-Log oder Terminal.", "success")
         return redirect(url_for("auth.verify_code"))
 
     return render_template("forgot_password.html")
@@ -44,28 +93,42 @@ def verify_code():
 
         if code == session.get("reset_code"):
             return redirect(url_for("auth.reset_password"))
-        else:
-            flash("Falscher Code", "danger")
+
+        flash("Falscher Code.", "danger")
+        return redirect(url_for("auth.verify_code"))
 
     return render_template("verify_code.html")
 
 
 @auth_bp.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
+    email = session.get("reset_email")
+
+    if not email:
+        flash("Bitte zuerst E-Mail eingeben.", "warning")
+        return redirect(url_for("auth.forgot_password"))
+
     if request.method == "POST":
         pw = request.form.get("password")
         pw2 = request.form.get("password_confirm")
 
         if pw != pw2:
-            flash("Passwörter stimmen nicht", "danger")
+            flash("Passwörter stimmen nicht überein.", "danger")
             return redirect(url_for("auth.reset_password"))
 
-        user = User.query.filter_by(email=session.get("reset_email")).first()
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            flash("Benutzer nicht gefunden.", "danger")
+            return redirect(url_for("auth.forgot_password"))
 
         user.password = generate_password_hash(pw)
         db.session.commit()
 
-        flash("Passwort geändert", "success")
+        session.pop("reset_email", None)
+        session.pop("reset_code", None)
+
+        flash("Passwort wurde geändert.", "success")
         return redirect(url_for("auth.login"))
 
     return render_template("reset_password.html")
